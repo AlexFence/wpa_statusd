@@ -1,4 +1,4 @@
-//use serde::{Serialize, Deserialize};
+use crate::parse::Status;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
@@ -26,5 +26,11 @@ pub enum RequestParams {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ResponseResult {
-    Status { contected: bool }
+    Status(Status)
+}
+
+pub struct Request { 
+    pub id: String, 
+    pub method: Method, 
+    pub params: Option<RequestParams> 
 }

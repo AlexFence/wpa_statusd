@@ -6,7 +6,7 @@ use std::thread;
 use std::collections::hash_map::HashMap;
 use config;
 use bson;
-use crate::protocol::{Message, ErrorCode, ResponseResult};
+use crate::protocol::{Message, ErrorCode, Request};
 
 
 fn handle_client(mut stream: UnixStream) {
@@ -14,23 +14,23 @@ fn handle_client(mut stream: UnixStream) {
     if !document.is_err() {
         let bson_msg = bson::from_bson(bson::Bson::Document(document.unwrap()));
         
-        if true  { //bson_msg.is_ok() {
+        if bson_msg.is_ok() {
             let msg: Message = bson_msg.unwrap();
             
             println!("{:#?}", msg);
             match msg {
-                Message::Request { id, method, .. } => {
-                    let resp = Message::Response {
-                        id, 
-                        method, 
-                        result: ResponseResult::Status { contected: true }  
-                    };
+                Message::Request { id, method, params } => {
+                    let resp = crate::commands::handle_request(Request { id, method, params });
 
                     println!("{:#?}", resp);
                     return send_message(stream, resp);
                 },
                 _ => {
-                    let err = Message::Error {id: None, method: None, code: ErrorCode::MalformedRequest };
+                    let err = Message::Error {
+                        id: None, 
+                        method: None, 
+                        code: ErrorCode::MalformedRequest 
+                    };
                     return send_message(stream, err);
                 }
             }
