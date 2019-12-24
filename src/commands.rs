@@ -22,6 +22,7 @@ fn handle_status(req: Request, config: HashMap<String, String>) -> Message {
             .open()
             .unwrap();
         let status = wpa.request("STATUS").unwrap();
+        debug!("wpa_supplicant status response:\n{}", status);
         let status_model = Status::parse(status);
 
         if status_model.is_some() {
@@ -33,6 +34,8 @@ fn handle_status(req: Request, config: HashMap<String, String>) -> Message {
                 result,
             };
         }
+    } else {
+        error!("wpa_supplicant_socket is not configured");
     }
 
     Message::Error {

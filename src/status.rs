@@ -1,19 +1,26 @@
 use std::collections::HashMap;
 
+fn convert_option(option: Option<&String>) -> Option<String> {
+    match option {
+        Some(value) => Some(value.clone()),
+        None => None,
+    }
+}
+
 /// Repressents what is returned by wpa_supplicant's STATUS command.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Status {
-    bssid: String,
-    freq: i32,
-    ssid: String,
-    id: String,
-    mode: String,
-    pairwise_cipher: String,
-    group_cipher: String,
-    key_mgmt: String,
-    wpa_state: String,
-    ip_address: String,
-    address: String,
+    bssid: Option<String>,
+    freq: Option<i32>,
+    ssid: Option<String>,
+    id: Option<String>,
+    mode: Option<String>,
+    pairwise_cipher: Option<String>,
+    group_cipher: Option<String>,
+    key_mgmt: Option<String>,
+    wpa_state: Option<String>,
+    ip_address: Option<String>,
+    address: Option<String>,
     uuid: String,
 }
 
@@ -21,30 +28,29 @@ impl Status {
     /// Parses the text returned by wpa_supplicant's STATUS command.
     pub fn parse(status_str: String) -> Option<Self> {
         let map: HashMap<String, String> = Self::parse_hashmap(status_str);
-        let freq: i32;
+        let freq: Option<i32>;
 
-        if !map.contains_key("bssid") {
+        if !map.contains_key("uuid") {
             return None;
         }
 
-        if !map.contains_key("freq") {
-            return None;
-        } else {
-            freq = map.get("freq").unwrap().parse().unwrap_or(0);
-        }
+        freq = match map.get("freq") {
+            Some(value) => Some(value.parse().unwrap_or(0)),
+            None => None,
+        };
 
         Some(Status {
-            bssid: map.get("bssid").unwrap().clone(),
+            bssid: convert_option(map.get("bssid")),
             freq,
-            ssid: map.get("ssid").unwrap().clone(),
-            id: map.get("id").unwrap().clone(),
-            mode: map.get("mode").unwrap().clone(),
-            pairwise_cipher: map.get("pairwise_cipher").unwrap().clone(),
-            group_cipher: map.get("group_cipher").unwrap().clone(),
-            key_mgmt: map.get("key_mgmt").unwrap().clone(),
-            wpa_state: map.get("wpa_state").unwrap().clone(),
-            ip_address: map.get("ip_address").unwrap().clone(),
-            address: map.get("address").unwrap().clone(),
+            ssid: convert_option(map.get("ssid")),
+            id: convert_option(map.get("id")),
+            mode: convert_option(map.get("mode")),
+            pairwise_cipher: convert_option(map.get("pairwise_cipher")),
+            group_cipher: convert_option(map.get("group_cipher")),
+            key_mgmt: convert_option(map.get("key_mgmt")),
+            wpa_state: convert_option(map.get("wpa_state")),
+            ip_address: convert_option(map.get("ip_address")),
+            address: convert_option(map.get("address")),
             uuid: map.get("uuid").unwrap().clone(),
         })
     }
