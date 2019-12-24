@@ -1,5 +1,5 @@
 use crate::protocol::{Request, Message, ErrorCode, Method, ResponseResult};
-use crate::parse::Status;
+use crate::status::Status;
 
 pub fn handle_request(req: Request) -> Message {
     match req.method {
@@ -22,5 +22,10 @@ fn handle_status(req: Request) -> Message {
     
         return Message::Response { id: req.id, method: req.method, result };
     }
-    Message::Error { id: Some(req.id), method: Some(req.method), code: ErrorCode::MalformedRequest }
+
+    Message::Error { 
+        id: Some(req.id), 
+        method: Some(req.method), 
+        code: ErrorCode::InternalError
+    }
 }

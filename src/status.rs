@@ -21,7 +21,7 @@ impl Status {
     pub fn parse(status_str: String) -> Option<Self> {
         let map: HashMap<String, String> = Self::parse_hashmap(status_str);
         let freq: i32;
-
+        
         if !map.contains_key("bssid") {
             return None;
         }
@@ -45,7 +45,7 @@ impl Status {
             wpa_state: map.get("wpa_state").unwrap().clone(),
             ip_address: map.get("ip_address").unwrap().clone(),
             address: map.get("address").unwrap().clone(),
-            uuid: map.get("uudi").unwrap().clone(),
+            uuid: map.get("uuid").unwrap().clone(),
         })
     }
 
@@ -54,13 +54,17 @@ impl Status {
         let lines = string.split("\n");
 
         for line in lines {
-            let mut pair = line.splitn(1, "=");
-            // we should always have at least one string
-            // the unwrap should be safe, maybe
-            let key = pair.next().unwrap();
-            let value = pair.next().unwrap_or("");
-
-            map.insert(String::from(key), String::from(value));
+            if line != String::from("") {
+                let mut pair = line.split("=");
+                // we should always have at least one string
+                // the unwrap should be safe, maybe
+                let key = pair.next().unwrap();
+                let value = pair.next().unwrap_or("");
+                
+                println!("key: {}", key);
+                println!("value: {}", value);
+                map.insert(String::from(key), String::from(value));
+            }
         }
 
         map

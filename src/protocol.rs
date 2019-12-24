@@ -1,4 +1,4 @@
-use crate::parse::Status;
+use crate::status::Status;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
@@ -16,7 +16,8 @@ pub enum Method {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ErrorCode {
     MethodNotFound,
-    MalformedRequest
+    MalformedRequest,
+    InternalError
 }
 
 #[derive(Serialize, Deserialize, Debug)]

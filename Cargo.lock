@@ -531,7 +531,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "wpa_status"
+name = "wpa_statusd"
 version = "0.1.0"
 dependencies = [
  "bson 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",

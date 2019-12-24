@@ -1,5 +1,5 @@
 [package]
-name = "wpa_status"
+name = "wpa_statusd"
 version = "0.1.0"
 authors = ["fence <fence@desu-mail.moe>"]
 edition = "2018"
