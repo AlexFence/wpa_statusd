@@ -61,8 +61,6 @@ impl Status {
                 let key = pair.next().unwrap();
                 let value = pair.next().unwrap_or("");
 
-                println!("key: {}", key);
-                println!("value: {}", value);
                 map.insert(String::from(key), String::from(value));
             }
         }

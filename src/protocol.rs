@@ -70,6 +70,7 @@ pub enum ResponseResult {
     Pong,
 }
 
+#[derive(Debug)]
 pub struct Request {
     pub id: String,
     pub method: Method,

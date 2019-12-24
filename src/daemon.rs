@@ -14,6 +14,7 @@ fn handle_client(mut stream: UnixStream) {
     let document = bson::decode_document(&mut stream);
     if !document.is_err() {
         let mut request_document: OrderedDocument = document.unwrap();
+        debug!("incoming bson: {:#?}", request_document);
 
         // ensure that the request either doesn't contain a method,
         // which can and will be handled by serde and that it does
@@ -31,17 +32,18 @@ fn handle_client(mut stream: UnixStream) {
         }
 
         let bson_msg = bson::from_bson(bson::Bson::Document(request_document));
-
         if bson_msg.is_ok() {
             let msg: Message = bson_msg.unwrap();
 
-            println!("{:#?}", msg);
             match msg {
                 Message::Request { id, method, params } => {
-                    let resp = crate::commands::handle_request(Request { id, method, params });
+                    let request = Request { id, method, params };
+                    info!("request: {:#?}", request);
 
-                    println!("{:#?}", resp);
-                    return send_message(stream, resp);
+                    let response = crate::commands::handle_request(request);
+                    info!("response: {:#?}", response);
+
+                    return send_message(stream, response);
                 }
                 _ => {
                     let err = Message::Error {
@@ -49,6 +51,7 @@ fn handle_client(mut stream: UnixStream) {
                         method: None,
                         code: ErrorCode::MalformedRequest,
                     };
+                    info!("error: {:#?}", err);
                     return send_message(stream, err);
                 }
             }
@@ -60,7 +63,7 @@ fn handle_client(mut stream: UnixStream) {
         method: None,
         code: ErrorCode::MalformedRequest,
     };
-    println!("{:#?}", err);
+    info!("error: {:#?}", err);
     return send_message(stream, err);
 }
 
@@ -100,11 +103,11 @@ impl Daemon {
         for stream in self.listener.incoming() {
             match stream {
                 Ok(stream) => {
-                    /* connection succeeded */
+                    // connection succeeded
                     thread::spawn(|| handle_client(stream));
                 }
                 Err(err) => {
-                    /* connection failed */
+                    // connection failed
                     break;
                 }
             }
