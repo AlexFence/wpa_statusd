@@ -1,5 +1,7 @@
-use crate::protocol::{ErrorCode, Message, Request};
+use crate::protocol::{ErrorCode, Message, Method, Request};
 use bson;
+use bson::ordered::OrderedDocument;
+use bson::Bson;
 use config;
 use std::collections::hash_map::HashMap;
 use std::fs;
@@ -11,7 +13,24 @@ use std::thread;
 fn handle_client(mut stream: UnixStream) {
     let document = bson::decode_document(&mut stream);
     if !document.is_err() {
-        let bson_msg = bson::from_bson(bson::Bson::Document(document.unwrap()));
+        let mut request_document: OrderedDocument = document.unwrap();
+
+        // ensure that the request either doesn't contain a method,
+        // which can and will be handled by serde and that it does
+        // contain a valid method, otherwhise the request can't be
+        // deserialized by serde and will trigger a MalformedRequest
+        // error
+        match request_document.get_str("method") {
+            Ok(value) => {
+                request_document.insert_bson(
+                    String::from("method"),
+                    Bson::String(String::from(Method::get_valid_method(value))),
+                );
+            }
+            Err(_err) => {}
+        }
+
+        let bson_msg = bson::from_bson(bson::Bson::Document(request_document));
 
         if bson_msg.is_ok() {
             let msg: Message = bson_msg.unwrap();

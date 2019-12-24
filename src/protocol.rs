@@ -5,6 +5,7 @@ use crate::status::Status;
 pub enum Message {
     Request {
         id: String,
+        #[serde(default = "Method::not_found")]
         method: Method,
         params: Option<RequestParams>,
     },
@@ -23,6 +24,28 @@ pub enum Message {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Method {
     STATUS,
+    NOTFOUND,
+}
+
+impl Method {
+    pub fn not_found() -> Method {
+        Method::NOTFOUND
+    }
+
+    pub fn get_from_string(string: &str) -> Method {
+        match string {
+            "STATUS" => Method::STATUS,
+            _ => Method::NOTFOUND,
+        }
+    }
+
+    pub fn get_valid_method(string: &str) -> &str {
+        match string {
+            "STATUS" => "STATUS",
+            "status" => "STATUS",
+            _ => "NOTFOUND",
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
