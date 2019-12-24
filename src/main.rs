@@ -1,17 +1,16 @@
-extern crate config;
-extern crate wpactrl;
-extern crate serde;
 extern crate bson;
+extern crate config;
+extern crate serde;
+extern crate wpactrl;
 //extern crate serde_bytes;
 //extern crate serde_cbor;
 
 #[macro_use]
 extern crate serde_derive;
 
-
+mod commands;
 pub mod daemon;
 pub mod protocol;
-mod commands;
 mod status;
 
 fn main() {

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-
+/// Repressents what is returned by wpa_supplicant's STATUS command.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Status {
     bssid: String,
@@ -18,10 +18,11 @@ pub struct Status {
 }
 
 impl Status {
+    /// Parses the text returned by wpa_supplicant's STATUS command.
     pub fn parse(status_str: String) -> Option<Self> {
         let map: HashMap<String, String> = Self::parse_hashmap(status_str);
         let freq: i32;
-        
+
         if !map.contains_key("bssid") {
             return None;
         }
@@ -29,10 +30,9 @@ impl Status {
         if !map.contains_key("freq") {
             return None;
         } else {
-             freq = map.get("freq").unwrap().parse().unwrap_or(0);
+            freq = map.get("freq").unwrap().parse().unwrap_or(0);
         }
 
-        
         Some(Status {
             bssid: map.get("bssid").unwrap().clone(),
             freq,
@@ -60,7 +60,7 @@ impl Status {
                 // the unwrap should be safe, maybe
                 let key = pair.next().unwrap();
                 let value = pair.next().unwrap_or("");
-                
+
                 println!("key: {}", key);
                 println!("value: {}", value);
                 map.insert(String::from(key), String::from(value));

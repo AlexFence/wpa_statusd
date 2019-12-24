@@ -1,22 +1,21 @@
-use std::io::prelude::*;
-use std::os::unix::net::{UnixStream, UnixListener};
-use std::path::Path;
-use std::fs;
-use std::thread;
-use std::collections::hash_map::HashMap;
-use config;
+use crate::protocol::{ErrorCode, Message, Request};
 use bson;
-use crate::protocol::{Message, ErrorCode, Request};
-
+use config;
+use std::collections::hash_map::HashMap;
+use std::fs;
+use std::io::prelude::*;
+use std::os::unix::net::{UnixListener, UnixStream};
+use std::path::Path;
+use std::thread;
 
 fn handle_client(mut stream: UnixStream) {
     let document = bson::decode_document(&mut stream);
     if !document.is_err() {
         let bson_msg = bson::from_bson(bson::Bson::Document(document.unwrap()));
-        
+
         if bson_msg.is_ok() {
             let msg: Message = bson_msg.unwrap();
-            
+
             println!("{:#?}", msg);
             match msg {
                 Message::Request { id, method, params } => {
@@ -24,20 +23,24 @@ fn handle_client(mut stream: UnixStream) {
 
                     println!("{:#?}", resp);
                     return send_message(stream, resp);
-                },
+                }
                 _ => {
                     let err = Message::Error {
-                        id: None, 
-                        method: None, 
-                        code: ErrorCode::MalformedRequest 
+                        id: None,
+                        method: None,
+                        code: ErrorCode::MalformedRequest,
                     };
                     return send_message(stream, err);
                 }
             }
         }
     }
-    
-    let err = Message::Error {id: None, method: None, code: ErrorCode::MalformedRequest };
+
+    let err = Message::Error {
+        id: None,
+        method: None,
+        code: ErrorCode::MalformedRequest,
+    };
     println!("{:#?}", err);
     return send_message(stream, err);
 }
@@ -71,10 +74,10 @@ impl Daemon {
     pub fn new(config: HashMap<String, String>) -> Self {
         let listener = Self::startup();
 
-        Daemon {listener}
+        Daemon { listener }
     }
 
-    pub fn run(&self){
+    pub fn run(&self) {
         for stream in self.listener.incoming() {
             match stream {
                 Ok(stream) => {
@@ -92,6 +95,8 @@ impl Daemon {
 
 pub fn get_config() -> Result<HashMap<String, String>, config::ConfigError> {
     let mut settings = config::Config::default();
-    settings.merge(config::File::with_name("/etc/wifi-chand.ini")).unwrap();
+    settings
+        .merge(config::File::with_name("/etc/wifi-chand.ini"))
+        .unwrap();
     settings.deserialize::<HashMap<String, String>>()
 }
