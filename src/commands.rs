@@ -4,6 +4,7 @@ use crate::status::Status;
 pub fn handle_request(req: Request) -> Message {
     match req.method {
         Method::STATUS => handle_status(req),
+        Method::PING => handle_ping(req),
         _ => Message::Error {
             id: Some(req.id),
             method: None,
@@ -34,5 +35,13 @@ fn handle_status(req: Request) -> Message {
         id: Some(req.id),
         method: Some(req.method),
         code: ErrorCode::InternalError,
+    }
+}
+
+fn handle_ping(req: Request) -> Message {
+    Message::Response {
+        id: req.id,
+        method: req.method,
+        result: ResponseResult::Pong,
     }
 }

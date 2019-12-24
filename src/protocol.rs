@@ -24,6 +24,7 @@ pub enum Message {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Method {
     STATUS,
+    PING,
     NOTFOUND,
 }
 
@@ -35,6 +36,7 @@ impl Method {
     pub fn get_from_string(string: &str) -> Method {
         match string {
             "STATUS" => Method::STATUS,
+            "PING" => Method::PING,
             _ => Method::NOTFOUND,
         }
     }
@@ -43,6 +45,8 @@ impl Method {
         match string {
             "STATUS" => "STATUS",
             "status" => "STATUS",
+            "PING" => "PING",
+            "ping" => "PING",
             _ => "NOTFOUND",
         }
     }
@@ -63,6 +67,7 @@ pub enum RequestParams {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ResponseResult {
     Status(Status),
+    Pong,
 }
 
 pub struct Request {
