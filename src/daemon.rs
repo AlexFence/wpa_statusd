@@ -14,24 +14,39 @@ use crate::protocol::{ErrorCode, Message, Method, Request};
 
 #[derive(Debug)]
 pub struct Daemon {
+    config: HashMap<String, String>,
     listener: UnixListener,
 }
 
 impl Daemon {
-    fn startup() -> UnixListener {
-        let old = Path::new("/tmp/wifi-chan.sok");
+    fn startup(config: &HashMap<String, String>) -> UnixListener {
+        let mut socket_path = "/tmp/wpa_statusd.sok";
+        let configured_socket = config.get(&String::from("socket"));
 
-        if old.exists() {
-            fs::remove_file(old);
+        if configured_socket.is_some() {
+            socket_path = configured_socket.unwrap();
         }
 
-        UnixListener::bind("/tmp/wifi-chan.sok").unwrap()
+        let socket = Path::new(socket_path);
+
+        if socket.exists() {
+            let result = fs::remove_file(socket);
+
+            if result.is_err() {
+                error!("socket already exists: {}", socket_path);
+                std::process::exit(1);
+            }
+        }
+
+        let listener = UnixListener::bind(socket_path).unwrap();
+        info!("bound socket to: {}", socket_path);
+        listener
     }
 
     pub fn new(config: HashMap<String, String>) -> Self {
-        let listener = Self::startup();
+        let listener = Self::startup(&config);
 
-        Daemon { listener }
+        Daemon { listener, config }
     }
 
     pub fn run(&self) {
@@ -39,7 +54,8 @@ impl Daemon {
             match stream {
                 Ok(stream) => {
                     // connection succeeded
-                    thread::spawn(|| Daemon::handle_client(stream));
+                    let map: HashMap<String, String> = self.config.clone();
+                    thread::spawn(|| Daemon::handle_client(stream, map));
                 }
                 Err(err) => {
                     // connection failed
@@ -49,7 +65,7 @@ impl Daemon {
         }
     }
 
-    fn handle_client(mut stream: UnixStream) {
+    fn handle_client(mut stream: UnixStream, config: HashMap<String, String>) {
         let document = bson::decode_document(&mut stream);
         if !document.is_err() {
             let mut request_document: OrderedDocument = document.unwrap();
@@ -79,7 +95,7 @@ impl Daemon {
                         let request = Request { id, method, params };
                         info!("request: {:#?}", request);
 
-                        let response = crate::commands::handle_request(request);
+                        let response = crate::commands::handle_request(request, config);
                         info!("response: {:#?}", response);
 
                         return Daemon::send_message(stream, response);
@@ -119,8 +135,13 @@ impl Daemon {
 
 pub fn get_config() -> Result<HashMap<String, String>, config::ConfigError> {
     let mut settings = config::Config::default();
-    settings
-        .merge(config::File::with_name("/etc/wifi-chand.ini"))
-        .unwrap();
+    let result = settings.merge(config::File::with_name("/etc/wpa_statusd.ini"));
+
+    if result.is_err() {
+        warn!("no config file found. (/etc/wpa_statusd.ini)");
+    }
+
+    // TODO why do we convert that to a hashmap???
+    // seems dumb
     settings.deserialize::<HashMap<String, String>>()
 }
