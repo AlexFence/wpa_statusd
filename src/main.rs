@@ -17,7 +17,10 @@ mod status;
 
 use daemon::Daemon;
 
+const LOGO: &'static str = include_str!("../logo");
+
 fn main() {
+    print!("{}", LOGO);
     env_logger::init();
     let conf = daemon::get_config();
     let d = Daemon::new(conf.unwrap());
