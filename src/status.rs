@@ -1,3 +1,5 @@
+/// This module is meant to transform the output of the wpa_supplicant's
+/// STATUS command into a serializable format.
 use std::collections::HashMap;
 
 fn convert_option(option: Option<&String>) -> Option<String> {

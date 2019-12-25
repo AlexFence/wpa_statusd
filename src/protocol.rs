@@ -1,3 +1,4 @@
+use crate::network_list::Network;
 use crate::status::Status;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,6 +25,8 @@ pub enum Message {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Method {
     STATUS,
+    LIST_NETWORKS,
+    SUPPLICANT_RUNNING,
     PING,
     NOTFOUND,
 }
@@ -33,20 +36,16 @@ impl Method {
         Method::NOTFOUND
     }
 
-    pub fn get_from_string(string: &str) -> Method {
-        match string {
-            "STATUS" => Method::STATUS,
-            "PING" => Method::PING,
-            _ => Method::NOTFOUND,
-        }
-    }
-
     pub fn get_valid_method(string: &str) -> &str {
         match string {
             "STATUS" => "STATUS",
             "status" => "STATUS",
             "PING" => "PING",
             "ping" => "PING",
+            "LIST_NETWORKS" => "LIST_NETWORKS",
+            "list_networks" => "LIST_NETWORKS",
+            "SUPPLICANT_RUNNING" => "SUPPLICANT_RUNNING",
+            "supplicant_running" => "SUPPLICANT_RUNNING",
             _ => "NOTFOUND",
         }
     }
@@ -67,6 +66,8 @@ pub enum RequestParams {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ResponseResult {
     Status(Status),
+    SupplicantRunning { running: bool },
+    Networks(Vec<Network>),
     Pong,
 }
 
