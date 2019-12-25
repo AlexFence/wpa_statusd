@@ -12,16 +12,18 @@ extern crate wpactrl;
 
 mod commands;
 mod daemon;
+mod network_list;
 mod protocol;
 mod status;
 
 use daemon::Daemon;
+use env_logger::Env;
 
 const LOGO: &'static str = include_str!("../logo");
 
 fn main() {
     print!("{}", LOGO);
-    env_logger::init();
+    env_logger::from_env(Env::default().default_filter_or("info")).init();
     let conf = daemon::get_config();
     let d = Daemon::new(conf.unwrap());
     d.run()

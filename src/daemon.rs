@@ -127,8 +127,17 @@ impl Daemon {
 
         if let bson::Bson::Document(document) = bson_data.unwrap() {
             let mut buf = Vec::new();
-            bson::encode_document(&mut buf, &document);
-            stream.write_all(&buf);
+            let encode_result = bson::encode_document(&mut buf, &document);
+            if encode_result.is_err() {
+                warn!("could not encode BSON-document");
+            }
+
+            let write_result = stream.write_all(&buf);
+            if write_result.is_err() {
+                error!("could not write message: {:#?}", msg);
+            }
+        } else {
+            error!("could not convert message as BSON: {:#?}", msg);
         }
     }
 }
