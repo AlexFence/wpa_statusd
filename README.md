@@ -1,4 +1,4 @@
-# WPA_statusd
+# Wpa_statusd
 WPA_statusd is a tiny system daemon which provides a silly little readonly interface to wpa_supplicant.
 
 It is meant to be used in a way where the user starts up wpa_supplicant manually.
