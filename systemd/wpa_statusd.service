@@ -1,0 +1,8 @@
+[Unit]
+Description=wpa_statusd
+
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/wpa_statusd
+ExecStartPost=/usr/local/lib/wpa_statusd_reset_permissions.sh
+

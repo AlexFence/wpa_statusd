@@ -50,6 +50,9 @@ impl Daemon {
     }
 
     pub fn run(&self) {
+        #[cfg(feature = "systemd")]
+        systemd::daemon::notify(false, [(systemd::daemon::STATE_READY, "1")].iter());
+
         for stream in self.listener.incoming() {
             match stream {
                 Ok(stream) => {

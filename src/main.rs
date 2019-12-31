@@ -10,6 +10,9 @@ extern crate env_logger;
 extern crate serde;
 extern crate wpactrl;
 
+#[cfg(feature = "systemd")]
+extern crate systemd;
+
 mod commands;
 mod daemon;
 mod network_list;
