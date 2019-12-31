@@ -22,9 +22,11 @@ pub enum Message {
     },
 }
 
+#[allow(non_camel_case_types)]
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Method {
     STATUS,
+
     LIST_NETWORKS,
     SUPPLICANT_RUNNING,
     PING,

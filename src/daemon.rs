@@ -51,7 +51,10 @@ impl Daemon {
 
     pub fn run(&self) {
         #[cfg(feature = "systemd")]
-        systemd::daemon::notify(false, [(systemd::daemon::STATE_READY, "1")].iter());
+        {
+            systemd::daemon::notify(false, [(systemd::daemon::STATE_READY, "1")].iter());
+            info!("daemon initialized!");
+        }
 
         for stream in self.listener.incoming() {
             match stream {
@@ -60,7 +63,7 @@ impl Daemon {
                     let map: HashMap<String, String> = self.config.clone();
                     thread::spawn(|| Daemon::handle_client(stream, map));
                 }
-                Err(err) => {
+                Err(_err) => {
                     // connection failed
                     break;
                 }
