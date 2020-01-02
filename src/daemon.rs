@@ -99,10 +99,10 @@ impl Daemon {
                 match msg {
                     Message::Request { id, method, params } => {
                         let request = Request { id, method, params };
-                        info!("request: {:#?}", request);
+                        debug!("request: {:#?}", request);
 
                         let response = crate::commands::handle_request(request, config);
-                        info!("response: {:#?}", response);
+                        debug!("response: {:#?}", response);
 
                         return Daemon::send_message(stream, response);
                     }
@@ -112,7 +112,7 @@ impl Daemon {
                             method: None,
                             code: ErrorCode::MalformedRequest,
                         };
-                        info!("error: {:#?}", err);
+                        warn!("error: {:#?}", err);
                         return Daemon::send_message(stream, err);
                     }
                 }
@@ -124,7 +124,7 @@ impl Daemon {
             method: None,
             code: ErrorCode::MalformedRequest,
         };
-        info!("error: {:#?}", err);
+        warn!("error: {:#?}", err);
         return Daemon::send_message(stream, err);
     }
 
