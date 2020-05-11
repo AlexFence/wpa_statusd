@@ -2,7 +2,7 @@ SYSTEMD := true
 FEATURES := system-d
 PREFIX := /usr/local
 BIN := sbin
-SYSTEMD_DIR := /etc/systemd/systemd
+SYSTEMD_DIR := /etc/systemd/system
 
 
 
